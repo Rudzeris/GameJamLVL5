@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public interface ITouchable  
+public interface IInteractable  
 {
     public void Activate ();
 }

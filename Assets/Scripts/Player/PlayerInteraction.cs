@@ -18,7 +18,7 @@ public class PlayerInteraction : MonoBehaviour
 
     private void OnTriggerStay2D(Collider2D collision)
     {
-
+        Debug.LogWarning(collision.name);
         insideTrigger = collision.gameObject;
     }
 
@@ -32,9 +32,9 @@ public class PlayerInteraction : MonoBehaviour
 
         if (insideTrigger != null)
         {
-            if (insideTrigger.GetComponent<ITouchable>() != null)
+            if (insideTrigger.GetComponent<IInteractable>() != null)
             {
-                insideTrigger.GetComponent<ITouchable>().Activate();
+                insideTrigger.GetComponent<IInteractable>().Activate();
             }
         }
     }

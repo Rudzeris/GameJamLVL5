@@ -8,4 +8,5 @@ public static class GameEvent
     public const string LEVEL_FAILED = "LEVEL_FAILED";
     // Game
     public const string GAME_COMPLETE = "GAME_COMPLETE";
+    public const string TIMER_COMPLETE = "TIMER_COMPLETE";
 }
