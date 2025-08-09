@@ -1,69 +1,134 @@
-using System;
+﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
+[AddComponentMenu("Managers/MissionManager")]
 public class MissionManager : MonoBehaviour, IGameManager
 {
-    public ManagerStatus Status { get; private set; }
+    // Статус менеджера по контракту IGameManager
+    public ManagerStatus Status { get; private set; } = ManagerStatus.Shutdown;
 
-    public int curLevel { get; private set; }
-    public int maxLevel { get; private set; }
+    // Список активных задач
+    public List<TaskData> Tasks = new();
 
+    // Старт менеджера (вызывается из Managers.StartupManagers)
     public void Startup()
     {
-        Debug.Log("MissionManager starting...");
+        // Инициализируем задачи
+        InitializeTasks();
 
-        UpdateData(0, 2);
+        // Подписываемся на сбор предметов
+        try
+        {
+            Messenger<ItemType, int>.AddListener(GameEvent.ITEM_COLLECTED, OnItemCollected);
+        }
+        catch (Exception ex)
+        {
+            Debug.LogError($"MissionManager subscribe error: {ex.Message}");
+        }
 
         Status = ManagerStatus.Started;
+        Debug.Log("[MissionManager] Started");
     }
 
-    public void UpdateData(int curLevel, int maxLevel)
+    private void OnDestroy()
     {
-        this.curLevel = curLevel;
-        this.maxLevel = maxLevel;
-    }
-
-    public void RestartCurrent()
-    {
-        string name = "Level " + curLevel;
-        Debug.Log($"Restarting current level: {name}");
-        SceneManager.LoadScene(name);
-    }
-    public void OpenLevel()
-    {
-        if (curLevel < maxLevel)
+        // Безопасно отписываемся
+        try
         {
-            curLevel++;
-            string name = "Level " + curLevel;
-            Debug.Log($"Going to next level: {name}");
-            SceneManager.LoadScene(name);
+            Messenger<ItemType, int>.RemoveListener(GameEvent.ITEM_COLLECTED, OnItemCollected);
         }
-        else
+        catch { /* игнорируем при выгрузке */ }
+    }
+
+    // Создание двух упомянутых задач
+    private void InitializeTasks()
+    {
+        var task1 = new TaskData(
+            title: "Grain for Chicken",
+            description: "Collect 2 grains and bring them to the chicken",
+            point: DeliveryPointType.Chicken,
+            reqs: new[]
+            {
+                new TaskRequirement(ItemType.Grain, 2)
+            });
+
+        var task2 = new TaskData(
+            title: "Campfire Set",
+            description: "Collect 3 flowers and 2 eggs and bring them to the campfire",
+            point: DeliveryPointType.Campfire,
+            reqs: new[]
+            {
+                new TaskRequirement(ItemType.Flower, 3),
+                new TaskRequirement(ItemType.Egg, 2)
+            });
+
+        Tasks = new List<TaskData> { task1, task2 };
+    }
+
+    // Обработка события сбора предметов
+    private void OnItemCollected(ItemType type, int amount)
+    {
+        foreach (var task in Tasks)
         {
-            Debug.LogWarning("No more levels to go to.");
+            var prevStatus = task.Status;
+            bool changed = task.OnItemCollected(type, amount);
+
+            if (!changed && prevStatus == task.Status) continue;
+
+            // Шлём прогресс задачи
             try
             {
-                Messenger.Broadcast(GameEvent.GAME_COMPLETE);
+                Messenger<string, string>.Broadcast(GameEvent.TASK_PROGRESS, task.Title, task.GetProgressString());
             }
             catch (Exception ex)
             {
-                Debug.LogWarning($"Error: {ex.Message}");
+                Debug.LogWarning($"TASK_PROGRESS broadcast error: {ex.Message}");
+            }
+
+            // Если задача впервые стала готова к сдаче — сообщаем
+            if (prevStatus != TaskStatus.ReadyForDelivery && task.Status == TaskStatus.ReadyForDelivery)
+            {
+                try
+                {
+                    Messenger<string>.Broadcast(GameEvent.TASK_READY_FOR_DELIVERY, task.Title);
+                }
+                catch (Exception ex)
+                {
+                    Debug.LogWarning($"TASK_READY_FOR_DELIVERY broadcast error: {ex.Message}");
+                }
             }
         }
     }
-    public void MainMenu()
+
+    // Попытка сдать задачи в точке доставки
+    public bool TryDeliver(DeliveryPointType point)
     {
-        Debug.Log($"Going to Main Menu");
-        SceneManager.LoadScene("MainMenu");
-    }
-    public void ExitGame()
-    {
-        Debug.Log("The game is coming to an end");
-#if UNITY_EDITOR
-        UnityEditor.EditorApplication.isPlaying = false;
-#else
-        Application.Quit();
-#endif
+        bool deliveredAny = false;
+
+        foreach (var task in Tasks)
+        {
+            if (task.TryDeliver(point))
+            {
+                deliveredAny = true;
+
+                // Уведомляем о завершении
+                try
+                {
+                    Messenger<string>.Broadcast(GameEvent.TASK_COMPLETED, task.Title);
+                }
+                catch (Exception ex)
+                {
+                    Debug.LogWarning($"TASK_COMPLETED broadcast error: {ex.Message}");
+                }
+
+                Debug.Log($"[MissionManager] Task completed: {task.Title}");
+            }
+        }
+
+        if (!deliveredAny)
+            Debug.Log("[MissionManager] No tasks ready for delivery at this point");
+
+        return deliveredAny;
     }
 }

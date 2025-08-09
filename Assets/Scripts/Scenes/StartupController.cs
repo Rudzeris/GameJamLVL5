@@ -19,6 +19,6 @@ public class StartupController : MonoBehaviour
 
     private void OnManagersStarted()
     {
-        Managers.Mission.MainMenu();
+        Managers.Game.MainMenu();
     }
 }

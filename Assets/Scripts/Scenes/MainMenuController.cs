@@ -7,11 +7,11 @@ public class MainMenuController : MonoBehaviour
     public void StartGame()
     {
         Managers.Audio.PlaySound(buttonClickClip);
-        Managers.Mission.OpenLevel();
+        Managers.Game.OpenLevel();
     }
     public void ExitGame()
     {
         Managers.Audio.PlaySound(buttonClickClip);
-        Managers.Mission.ExitGame();
+        Managers.Game.ExitGame();
     }
 }

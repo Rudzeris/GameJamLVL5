@@ -8,4 +8,11 @@ public static class GameEvent
     public const string LEVEL_FAILED = "LEVEL_FAILED";
     // Game
     public const string GAME_COMPLETE = "GAME_COMPLETE";
+    // Items
+    public const string ITEM_COLLECTED = "ITEM_COLLECTED"; // payload: (ItemType type, int amount)
+    // Tasks/Missions
+    public const string TASK_PROGRESS = "TASK_PROGRESS";       // payload: (string title, string progressText)
+    public const string TASK_READY_FOR_DELIVERY = "TASK_READY_FOR_DELIVERY"; // payload: (string title)
+    public const string TASK_COMPLETED = "TASK_COMPLETED";     // payload: (string title)
+
 }
