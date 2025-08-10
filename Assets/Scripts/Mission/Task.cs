@@ -38,7 +38,12 @@ public class TaskData
 
     public TaskStatus Status { get; private set; } = TaskStatus.NotStarted;
 
-    public TaskData(string title, string description, DeliveryPointType point, IEnumerable<TaskRequirement> reqs)
+    public TaskData()
+    {
+        progress = new();
+    }
+
+    public TaskData(string title, string description, DeliveryPointType point, IEnumerable<TaskRequirement> reqs) : this()  
     {
         Title = title;
         Description = description;

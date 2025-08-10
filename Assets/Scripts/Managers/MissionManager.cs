@@ -14,9 +14,6 @@ public class MissionManager : MonoBehaviour, IGameManager
     // Старт менеджера (вызывается из Managers.StartupManagers)
     public void Startup()
     {
-        // Инициализируем задачи
-        InitializeTasks();
-
         // Подписываемся на сбор предметов
         try
         {
@@ -41,30 +38,6 @@ public class MissionManager : MonoBehaviour, IGameManager
         catch { /* игнорируем при выгрузке */ }
     }
 
-    // Создание двух упомянутых задач
-    private void InitializeTasks()
-    {
-        var task1 = new TaskData(
-            title: "Grain for Chicken",
-            description: "Collect 2 grains and bring them to the chicken",
-            point: DeliveryPointType.Chicken,
-            reqs: new[]
-            {
-                new TaskRequirement(ItemType.Grain, 2)
-            });
-
-        var task2 = new TaskData(
-            title: "Campfire Set",
-            description: "Collect 3 flowers and 2 eggs and bring them to the campfire",
-            point: DeliveryPointType.Campfire,
-            reqs: new[]
-            {
-                new TaskRequirement(ItemType.Flower, 3),
-                new TaskRequirement(ItemType.Egg, 2)
-            });
-
-        Tasks = new List<TaskData> { task1, task2 };
-    }
 
     // Обработка события сбора предметов
     private void OnItemCollected(ItemType type, int amount)
