@@ -1,20 +1,20 @@
 using DG.Tweening;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 public class CameraMover : MonoBehaviour
 {
-    public Vector3 posOffset = Vector3.zero;
-    private bool isBack = false;
+    public Vector2 newCameraPos = Vector2.zero;
+    private bool IsOn = false;
 
-    private void OnTriggerExit2D(Collider2D collision)
+    private void OnTriggerEnter2D(Collider2D collision)
     {
         if (collision != null)
         {
             if (collision.gameObject.CompareTag("Player"))
-            {
-                var camera = Camera.main.gameObject.transform.position + posOffset * (isBack ? -1 : 1);
-                Camera.main.transform.DOMove(camera, 0.1f).SetEase(Ease.InOutSine);
-                isBack = !isBack;
+            { 
+                    var camera = new Vector3(newCameraPos.x, newCameraPos.y, -10);
+                    Camera.main.transform.DOMove(camera, 0.1f).SetEase(Ease.InOutSine);
             }
         }
     }

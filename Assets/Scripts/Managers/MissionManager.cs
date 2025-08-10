@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 [AddComponentMenu("Managers/MissionManager")]
@@ -103,5 +104,16 @@ public class MissionManager : MonoBehaviour, IGameManager
             Debug.Log("[MissionManager] No tasks ready for delivery at this point");
 
         return deliveredAny;
+    }
+
+    public TaskStatus GetTaskStatus(DeliveryPointType point)
+    {
+        var task = Tasks.FirstOrDefault(t => t.DeliveryPoint == point);
+        if (task == null)
+        {
+            Debug.LogWarning($"[MissionManager] No task found for delivery point {point}");
+            return TaskStatus.NotStarted;
+        }
+        return task.Status;
     }
 }

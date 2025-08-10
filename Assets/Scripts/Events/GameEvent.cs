@@ -8,9 +8,7 @@ public static class GameEvent
     public const string LEVEL_FAILED = "LEVEL_FAILED";
     // Game
     public const string GAME_COMPLETE = "GAME_COMPLETE";
-<<<<<<< HEAD
     public const string TIMER_COMPLETE = "TIMER_COMPLETE";
-=======
     // Items
     public const string ITEM_COLLECTED = "ITEM_COLLECTED"; // payload: (ItemType type, int amount)
     // Tasks/Missions
@@ -18,5 +16,4 @@ public static class GameEvent
     public const string TASK_READY_FOR_DELIVERY = "TASK_READY_FOR_DELIVERY"; // payload: (string title)
     public const string TASK_COMPLETED = "TASK_COMPLETED";     // payload: (string title)
 
->>>>>>> 0c363b5e1d799c180a539cf261a1258486c6d643
 }

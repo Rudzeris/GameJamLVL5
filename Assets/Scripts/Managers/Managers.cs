@@ -1,4 +1,5 @@
-﻿using System;
+﻿using cherrydev;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
@@ -11,6 +12,7 @@ using UnityEngine;
 [RequireComponent(typeof(GameManager))]
 [RequireComponent(typeof(DataManager))]
 [RequireComponent(typeof(MissionManager))]
+[RequireComponent(typeof(DialogManager))]
 [AddComponentMenu("Managers/Managers")]
 public class Managers : MonoBehaviour
 {
@@ -22,6 +24,7 @@ public class Managers : MonoBehaviour
     public static GameManager Game { get; private set; }
     public static DataManager Data { get; private set; }
     public static MissionManager Mission { get; private set; }
+    public static DialogManager Dialog { get; private set; }
 
     private List<IGameManager> _startSequence;
 
@@ -44,6 +47,7 @@ public class Managers : MonoBehaviour
         Game = GetComponent<GameManager>();
         Data = GetComponent<DataManager>();
         Mission = GetComponent<MissionManager>();
+        Dialog = GetComponent<DialogManager>();
 
         _startSequence = new List<IGameManager>();
         _startSequence.Add(Audio);
@@ -53,6 +57,7 @@ public class Managers : MonoBehaviour
         _startSequence.Add(Game);
         _startSequence.Add(Data);
         _startSequence.Add(Mission);
+        _startSequence.Add(Dialog);
     }
     private void Start()
     {
