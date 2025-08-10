@@ -7,6 +7,6 @@ public class UIController : MonoBehaviour
     public void MainMenu()
     {
         Managers.Audio.PlaySound(buttonClickClip);
-        Managers.Mission.MainMenu();
+        Managers.Game.MainMenu();
     }
 }

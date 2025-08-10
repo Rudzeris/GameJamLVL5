@@ -8,8 +8,9 @@ using UnityEngine;
 [RequireComponent(typeof(StatisticsManager))]
 [RequireComponent(typeof(InventoryManager))]
 [RequireComponent(typeof(PlayerManager))]
-[RequireComponent(typeof(MissionManager))]
+[RequireComponent(typeof(GameManager))]
 [RequireComponent(typeof(DataManager))]
+[RequireComponent(typeof(MissionManager))]
 [AddComponentMenu("Managers/Managers")]
 public class Managers : MonoBehaviour
 {
@@ -18,8 +19,10 @@ public class Managers : MonoBehaviour
     public static StatisticsManager Statistics { get; private set; }
     public static InventoryManager Inventory { get; private set; }
     public static PlayerManager Player { get; private set; }
-    public static MissionManager Mission { get; private set; }
+    public static GameManager Game { get; private set; }
     public static DataManager Data { get; private set; }
+    public static MissionManager Mission { get; private set; }
+
     private List<IGameManager> _startSequence;
 
     private static Managers managers;
@@ -38,16 +41,18 @@ public class Managers : MonoBehaviour
         Statistics = GetComponent<StatisticsManager>();
         Inventory = GetComponent<InventoryManager>();
         Player = GetComponent<PlayerManager>();
-        Mission = GetComponent<MissionManager>();
+        Game = GetComponent<GameManager>();
         Data = GetComponent<DataManager>();
+        Mission = GetComponent<MissionManager>();
 
         _startSequence = new List<IGameManager>();
         _startSequence.Add(Audio);
         _startSequence.Add(Statistics);
         _startSequence.Add(Inventory);
         _startSequence.Add(Player);
-        _startSequence.Add(Mission);
+        _startSequence.Add(Game);
         _startSequence.Add(Data);
+        _startSequence.Add(Mission);
     }
     private void Start()
     {
