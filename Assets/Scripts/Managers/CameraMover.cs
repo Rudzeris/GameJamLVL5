@@ -5,7 +5,6 @@ using UnityEngine.UIElements;
 public class CameraMover : MonoBehaviour
 {
     public Vector2 newCameraPos = Vector2.zero;
-    private bool IsOn = false;
 
     private void OnTriggerEnter2D(Collider2D collision)
     {

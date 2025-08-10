@@ -6,19 +6,16 @@ using UnityEngine;
 [AddComponentMenu("Managers/MissionManager")]
 public class MissionManager : MonoBehaviour, IGameManager
 {
-    // Статус менеджера по контракту IGameManager
     public ManagerStatus Status { get; private set; } = ManagerStatus.Shutdown;
 
-    // Список активных задач
     public List<TaskData> Tasks = new();
 
-    // Старт менеджера (вызывается из Managers.StartupManagers)
     public void Startup()
     {
-        // Подписываемся на сбор предметов
         try
         {
-            Messenger<ItemType, int>.AddListener(GameEvent.ITEM_COLLECTED, OnItemCollected);
+            // Подписываемся на обновление инвентаря (сбор и расход)
+            Messenger<ItemType, int>.AddListener(GameEvent.INVENTORY_UPDATED, OnInventoryChanged);
         }
         catch (Exception ex)
         {
@@ -27,64 +24,95 @@ public class MissionManager : MonoBehaviour, IGameManager
 
         Status = ManagerStatus.Started;
         Debug.Log("[MissionManager] Started");
+
+        // Можно при старте сразу пересчитать прогресс по текущему инвентарю
+        RecalculateAllProgress();
     }
 
     private void OnDestroy()
     {
-        // Безопасно отписываемся
         try
         {
-            Messenger<ItemType, int>.RemoveListener(GameEvent.ITEM_COLLECTED, OnItemCollected);
+            Messenger<ItemType, int>.RemoveListener(GameEvent.INVENTORY_UPDATED, OnInventoryChanged);
         }
-        catch { /* игнорируем при выгрузке */ }
+        catch { }
     }
 
-
-    // Обработка события сбора предметов
-    private void OnItemCollected(ItemType type, int amount)
+    private void OnInventoryChanged(ItemType type, int currentAmount)
     {
+        bool anyStatusChanged = false;
+
         foreach (var task in Tasks)
         {
             var prevStatus = task.Status;
-            bool changed = task.OnItemCollected(type, amount);
 
-            if (!changed && prevStatus == task.Status) continue;
+            // Обновляем прогресс задания в зависимости от реального количества предметов в инвентаре
+            bool changed = task.UpdateProgress(type, currentAmount);
 
-            // Шлём прогресс задачи
-            try
+            if (changed)
+                anyStatusChanged = true;
+
+            if (changed || prevStatus != task.Status)
             {
+                // Рассылаем прогресс
                 Messenger<string, string>.Broadcast(GameEvent.TASK_PROGRESS, task.Title, task.GetProgressString());
-            }
-            catch (Exception ex)
-            {
-                Debug.LogWarning($"TASK_PROGRESS broadcast error: {ex.Message}");
-            }
 
-            // Если задача впервые стала готова к сдаче — сообщаем
-            if (prevStatus != TaskStatus.ReadyForDelivery && task.Status == TaskStatus.ReadyForDelivery)
-            {
-                try
+                // Если задача стала готова к сдаче — уведомляем
+                if (prevStatus != TaskStatus.ReadyForDelivery && task.Status == TaskStatus.ReadyForDelivery)
                 {
                     Messenger<string>.Broadcast(GameEvent.TASK_READY_FOR_DELIVERY, task.Title);
                 }
-                catch (Exception ex)
-                {
-                    Debug.LogWarning($"TASK_READY_FOR_DELIVERY broadcast error: {ex.Message}");
-                }
+                // Если задача стала не готова (например, предметы потрачены), можно добавить обработку, если нужно
             }
         }
     }
 
-    // Попытка сдать задачи в точке доставки
+    // При старте или необходимости можно пересчитать весь прогресс по инвентарю
+    private void RecalculateAllProgress()
+    {
+        foreach (var task in Tasks)
+        {
+            foreach (var req in task.Requirements)
+            {
+                int currentAmount = Managers.Inventory.GetItemCount(req.Type);
+                task.UpdateProgress(req.Type, currentAmount);
+            }
+        }
+    }
+
     public bool TryDeliver(DeliveryPointType point)
     {
         bool deliveredAny = false;
 
         foreach (var task in Tasks)
         {
-            if (task.TryDeliver(point))
+            if (task.DeliveryPoint == point && task.Status == TaskStatus.ReadyForDelivery)
             {
-                deliveredAny = true;
+                // Проверяем, есть ли действительно нужные предметы в инвентаре
+                bool hasAll = true;
+                foreach (var req in task.Requirements)
+                {
+                    if (Managers.Inventory.GetItemCount(req.Type) < req.Amount)
+                    {
+                        hasAll = false;
+                        break;
+                    }
+                }
+
+                if (!hasAll)
+                {
+                    Debug.LogWarning($"[MissionManager] Not enough items to deliver task {task.Title}");
+                    continue;
+                }
+
+                // Списываем предметы из инвентаря
+                foreach (var req in task.Requirements)
+                {
+                    Managers.Inventory.RemoveItem(req.Type, req.Amount);
+                }
+
+                // Меняем статус задачи
+                task.Status = TaskStatus.Completed;
 
                 // Уведомляем о завершении
                 try
@@ -97,6 +125,8 @@ public class MissionManager : MonoBehaviour, IGameManager
                 }
 
                 Debug.Log($"[MissionManager] Task completed: {task.Title}");
+
+                deliveredAny = true;
             }
         }
 
@@ -115,5 +145,17 @@ public class MissionManager : MonoBehaviour, IGameManager
             return TaskStatus.NotStarted;
         }
         return task.Status;
+    }
+
+    public bool TryGetRequiredItems(DeliveryPointType point, out List<TaskRequirement> requiredItems)
+    {
+        requiredItems = null;
+        var task = Tasks.FirstOrDefault(t => t.DeliveryPoint == point);
+
+        if (task == null)
+            return false;
+
+        requiredItems = task.Requirements;
+        return requiredItems != null && requiredItems.Count > 0;
     }
 }

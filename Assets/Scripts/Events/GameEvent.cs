@@ -15,5 +15,6 @@ public static class GameEvent
     public const string TASK_PROGRESS = "TASK_PROGRESS";       // payload: (string title, string progressText)
     public const string TASK_READY_FOR_DELIVERY = "TASK_READY_FOR_DELIVERY"; // payload: (string title)
     public const string TASK_COMPLETED = "TASK_COMPLETED";     // payload: (string title)
+    public const string INVENTORY_UPDATED = "INVENTORY_UPDATED";
 
 }

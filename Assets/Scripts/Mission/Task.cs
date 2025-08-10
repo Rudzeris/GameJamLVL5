@@ -36,7 +36,7 @@ public class TaskData
     // Внутренний прогресс: ItemType -> собранное количество
     private readonly Dictionary<ItemType, int> progress = new();
 
-    public TaskStatus Status { get; private set; } = TaskStatus.NotStarted;
+    public TaskStatus Status { get;  set; } = TaskStatus.NotStarted;
 
     public TaskData()
     {
@@ -106,5 +106,50 @@ public class TaskData
             parts.Add($"{r.Type}: {current}/{r.Amount}");
         }
         return string.Join(", ", parts);
+    }
+
+    private void UpdateStatus()
+    {
+        if (Status == TaskStatus.Completed)
+            return; // Уже выполнена
+
+        bool anyProgress = false;
+        bool allComplete = true;
+
+        foreach (var r in Requirements)
+        {
+            int current = progress.TryGetValue(r.Type, out var c) ? c : 0;
+
+            if (current > 0)
+                anyProgress = true;
+
+            if (current < r.Amount)
+                allComplete = false;
+        }
+
+        if (allComplete)
+            Status = TaskStatus.ReadyForDelivery;
+        else if (anyProgress)
+            Status = TaskStatus.InProgress;
+        else
+            Status = TaskStatus.NotStarted;
+    }
+
+    public bool UpdateProgress(ItemType type, int currentAmount)
+    {
+        var req = Requirements.FirstOrDefault(r => r.Type == type);
+        if (req == null)
+            return false;
+
+        int oldProgress = progress.TryGetValue(type, out var p) ? p : 0;
+        int newProgress = Mathf.Min(currentAmount, req.Amount);
+        progress[type] = newProgress;
+
+        bool changed = oldProgress != newProgress;
+
+        if (changed)
+            UpdateStatus();
+
+        return changed;
     }
 }

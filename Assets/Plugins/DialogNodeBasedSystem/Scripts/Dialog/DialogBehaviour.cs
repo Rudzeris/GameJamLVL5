@@ -500,7 +500,7 @@ namespace cherrydev
         /// <summary>
         /// Ends the dialog and unbinds all tracked external functions
         /// </summary>
-        private void EndDialog()
+        public void EndDialog()
         {
             _isDialogStarted = false;
             
