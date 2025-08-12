@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using cherrydev;
 
 public class MortarClicker : MonoBehaviour, IInteractable
 {
@@ -10,9 +11,11 @@ public class MortarClicker : MonoBehaviour, IInteractable
     public Slider progressBar;
     public TextMeshProUGUI statusText;
 
+
     [Header("Settings")]
+    public DialogNodeGraph StartDialog;
     public float clicksRequired = 10;
-    public RequiredItem[] requiredItems; // Теперь с количеством
+    public RequiredItem[] requiredItems; 
     public ItemType rewardItem;
     public int rewardAmount = 1;
 
@@ -62,12 +65,6 @@ public class MortarClicker : MonoBehaviour, IInteractable
 
     void CompleteMix()
     {
-        // Убираем ингредиенты
-        foreach (var req in requiredItems)
-        {
-            Managers.Inventory.RemoveItem(req.type, req.amount);
-        }
-
         // Даём награду
         Managers.Inventory.AddItem(rewardItem, rewardAmount);
 
@@ -82,11 +79,17 @@ public class MortarClicker : MonoBehaviour, IInteractable
 
     public void Activate()
     {
-        Managers.Mission.TryDeliver(DeliveryPointType.Mortar);
-        if(Managers.Mission.GetTaskStatus(DeliveryPointType.Mortar) == TaskStatus.Completed)
+       
+
+        if(Managers.Mission.GetTaskStatus(DeliveryPointType.Mortar) == TaskStatus.ReadyForDelivery)
         {
             GamePanel.SetActive(true);
         }
+    }
+
+    private void OnTriggerExit2D(Collider2D other)
+    {
+        GamePanel.SetActive(false);
     }
 }
 

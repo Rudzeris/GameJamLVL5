@@ -59,11 +59,15 @@ public class PlayerInteraction : MonoBehaviour
     {
         if (highlightedObject != null)
         {
-            var interactable = highlightedObject.GetComponent<IInteractable>();
-            if (interactable != null)
+            var interactable = highlightedObject.GetComponents<IInteractable>();
+            foreach (var item in interactable)
             {
-                interactable.Activate();
+                if (item != null)
+                {
+                    item.Activate();
+                }
             }
+            
         }
     }
 }
