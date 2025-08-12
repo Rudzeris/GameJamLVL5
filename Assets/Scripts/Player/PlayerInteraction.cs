@@ -23,6 +23,13 @@ public class PlayerInteraction : MonoBehaviour
 
     private void TryHighlight(GameObject obj)
     {
+        if(obj.GetComponent<IInteractable>() == null)
+        {
+            ClearHighlight();
+            return;
+        }
+            
+
         if (highlightedObject == obj)
             return; // Уже подсвечен этот объект
 
