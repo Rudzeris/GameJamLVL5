@@ -1,5 +1,6 @@
 ﻿public enum DeliveryPointType
 {
     Chicken,
-    Campfire
+    Campfire,
+    Mortar
 }

@@ -174,4 +174,24 @@ public class MissionManager : MonoBehaviour, IGameManager
 
         Debug.Log("[MissionManager] Missions reset to initial state");
     }
+
+    public bool SetTaskStatus(DeliveryPointType point, TaskStatus newStatus)
+    {
+        var task = Tasks.FirstOrDefault(t => t.DeliveryPoint == point);
+        if (task == null)
+        {
+            Debug.LogWarning($"[MissionManager] Task with delivery point '{point}' not found.");
+            return false;
+        }
+
+        if (task.Status != newStatus)
+        {
+            task.Status = newStatus;
+            Debug.Log($"[MissionManager] Task with delivery point '{point}' status changed to {newStatus}.");
+            Messenger<string, string>.Broadcast(GameEvent.TASK_PROGRESS, task.Title, task.GetProgressString());
+            return true;
+        }
+
+        return false; // Статус уже был таким
+    }
 }

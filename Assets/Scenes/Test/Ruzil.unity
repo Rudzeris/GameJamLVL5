@@ -597,7 +597,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 509424775781619163, guid: 55a2a58e5d8ae324eb526d4f84b5589a, type: 3}
       propertyPath: Tasks.Array.data[1].Requirements.Array.data[0].Amount
-      value: 2
+      value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 509424775781619163, guid: 55a2a58e5d8ae324eb526d4f84b5589a, type: 3}
       propertyPath: Tasks.Array.data[1].Requirements.Array.data[1].Amount

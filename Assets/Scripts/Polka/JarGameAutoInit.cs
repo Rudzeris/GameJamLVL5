@@ -63,7 +63,7 @@ public class JarGameAutoInit : MonoBehaviour
 
         openedJars[index] = true;
 
-        UpdateAttemptsText();
+        
 
         string content = jarsContents[index];
         TextMeshProUGUI jarText = jarButtons[index].GetComponentInChildren<TextMeshProUGUI>();
@@ -108,6 +108,8 @@ public class JarGameAutoInit : MonoBehaviour
             hintText.text = "Попытки закончились. Попробуйте снова!";
             EndGame(false);
         }
+
+        UpdateAttemptsText();
     }
 
     void UpdateAttemptsText()
