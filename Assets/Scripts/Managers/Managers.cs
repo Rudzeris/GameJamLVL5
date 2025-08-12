@@ -4,6 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 [RequireComponent(typeof(AudioManager))]
 [RequireComponent(typeof(StatisticsManager))]
@@ -114,5 +115,23 @@ public class Managers : MonoBehaviour
         }
         else
             Debug.LogError("Error started managers");
+    }
+
+
+    private void OnEnable()
+    {
+        SceneManager.sceneLoaded += OnSceneLoaded;
+    }
+
+    private void OnDisable()
+    {
+        SceneManager.sceneLoaded -= OnSceneLoaded;
+    }
+
+    private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        Mission.ResetMissions();
+        Dialog.ResetDialog();
+        Inventory.Clear();
     }
 }

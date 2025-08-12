@@ -141,15 +141,29 @@ public class TaskData
         if (req == null)
             return false;
 
-        int oldProgress = progress.TryGetValue(type, out var p) ? p : 0;
+        // Если в прогрессе нет такого предмета — добавляем его с нулём
+        if (!progress.ContainsKey(type))
+            progress[type] = 0;
+
+        int oldProgress = progress[type];
+
+        // Ограничиваем только требуемым количеством
         int newProgress = Mathf.Min(currentAmount, req.Amount);
-        progress[type] = newProgress;
 
-        bool changed = oldProgress != newProgress;
+        // Обновляем только если прогресс вырос
+        if (newProgress > oldProgress)
+            progress[type] = newProgress;
 
+        bool changed = oldProgress != progress[type];
         if (changed)
             UpdateStatus();
 
         return changed;
+    }
+
+    public void ResetProgress()
+    {
+        progress.Clear();
+        Status = TaskStatus.NotStarted;
     }
 }

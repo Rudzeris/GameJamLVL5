@@ -58,13 +58,5 @@ public class DeliveryZone : MonoBehaviour, IInteractable
         {
             Messenger<ItemType, int>.Broadcast(GameEvent.ITEM_COLLECTED, child.itemType, child.amount);
         }
-
-        if (Managers.Mission.TryGetRequiredItems(PointType, out var requiredItems))
-        {
-            foreach (var req in requiredItems)
-            {
-                Managers.Inventory.RemoveItem(req.Type, req.Amount);
-            }
-        }
     }
 }

@@ -2,6 +2,14 @@ using System;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
+public enum GameEnds
+{
+    GoodEnd,
+    BadEnd,
+    JarEnd,
+    HeloEnd
+}
+
 public class GameManager : MonoBehaviour, IGameManager
 {
     public ManagerStatus Status { get; private set; }
@@ -9,11 +17,25 @@ public class GameManager : MonoBehaviour, IGameManager
     public int curLevel { get; private set; }
     public int maxLevel { get; private set; }
 
+    private void OnEnable()
+    {
+        Messenger<GameEnds>.AddListener(GameEvent.GAME_COMPLETE, PlayEndCutscene);
+    }
+    private void OnDisable()
+    {
+        Messenger<GameEnds>.AddListener(GameEvent.GAME_COMPLETE, PlayEndCutscene);
+    }
+
+    private void PlayEndCutscene(GameEnds ends)
+    {
+        throw new NotImplementedException();
+    }
+
     public void Startup()
     {
         Debug.Log("MissionManager starting...");
 
-        UpdateData(0, 2);
+        UpdateData(1, 1);
 
         Status = ManagerStatus.Started;
     }
@@ -26,10 +48,11 @@ public class GameManager : MonoBehaviour, IGameManager
 
     public void RestartCurrent()
     {
-        string name = "Level " + curLevel;
+        string name = "Level" + curLevel;
         Debug.Log($"Restarting current level: {name}");
         SceneManager.LoadScene(name);
     }
+
     public void OpenLevel()
     {
         if (curLevel < maxLevel)

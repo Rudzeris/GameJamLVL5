@@ -5,13 +5,18 @@ using UnityEngine.EventSystems;
 public class BoilerUI : MonoBehaviour, IDropHandler
 {
     public Boiler boiler;
-    public InventoryManager inventoryManager;
+    private InventoryManager inventoryManager;
 
     public Transform slotsParent;
     public GameObject slotPrefab;
     public ItemDatabase itemDatabase;
 
     private Dictionary<ItemType, InventorySlot> slotsMap = new();
+
+    public void Start()
+    {
+        inventoryManager = Managers.Inventory;
+    }
 
     public void OnDrop(PointerEventData eventData)
     {
@@ -59,7 +64,7 @@ public class BoilerUI : MonoBehaviour, IDropHandler
     }
 
     // Очистить UI котла
-    private void ClearBoilerUI()
+    public void ClearBoilerUI()
     {
         foreach (var slot in slotsMap.Values)
         {

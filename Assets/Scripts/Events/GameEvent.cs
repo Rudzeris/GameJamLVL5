@@ -16,5 +16,6 @@ public static class GameEvent
     public const string TASK_READY_FOR_DELIVERY = "TASK_READY_FOR_DELIVERY"; // payload: (string title)
     public const string TASK_COMPLETED = "TASK_COMPLETED";     // payload: (string title)
     public const string INVENTORY_UPDATED = "INVENTORY_UPDATED";
-
+    public const string RECIPE_DISCOVERED = "RECIPE_DISCOVERED";
+    public const string JAR_GAME_COMPLETE = "JAR_GAME_COMPLETE";
 }

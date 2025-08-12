@@ -69,4 +69,11 @@ public class InventoryManager : MonoBehaviour, IGameManager
             return count;
         return 0;
     }
+
+    public void Clear()
+    {
+        items.Clear();
+        // Можно отправить событие об обновлении UI
+        Messenger<ItemType, int>.Broadcast(GameEvent.INVENTORY_UPDATED, default, 0);
+    }
 }

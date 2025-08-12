@@ -60,5 +60,7 @@ namespace Assets.Scripts
         {
             animator.SetBool("Attack", false);
         }
+
+
     }
 }

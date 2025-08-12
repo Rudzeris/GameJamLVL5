@@ -88,8 +88,9 @@ public class MissionManager : MonoBehaviour, IGameManager
         {
             if (task.DeliveryPoint == point && task.Status == TaskStatus.ReadyForDelivery)
             {
-                // Проверяем, есть ли действительно нужные предметы в инвентаре
                 bool hasAll = true;
+
+                // Проверяем, хватает ли предметов
                 foreach (var req in task.Requirements)
                 {
                     if (Managers.Inventory.GetItemCount(req.Type) < req.Amount)
@@ -105,27 +106,23 @@ public class MissionManager : MonoBehaviour, IGameManager
                     continue;
                 }
 
-                // Списываем предметы из инвентаря
+                // Списываем ровно столько, сколько требует задание
                 foreach (var req in task.Requirements)
                 {
                     Managers.Inventory.RemoveItem(req.Type, req.Amount);
                 }
 
-                // Меняем статус задачи
-                task.Status = TaskStatus.Completed;
+                // Обновляем прогресс задачи
+                foreach (var req in task.Requirements)
+                {
+                    int currentAmount = Managers.Inventory.GetItemCount(req.Type);
+                    task.UpdateProgress(req.Type, currentAmount);
+                }
 
-                // Уведомляем о завершении
-                try
-                {
-                    Messenger<string>.Broadcast(GameEvent.TASK_COMPLETED, task.Title);
-                }
-                catch (Exception ex)
-                {
-                    Debug.LogWarning($"TASK_COMPLETED broadcast error: {ex.Message}");
-                }
+                task.Status = TaskStatus.Completed;
+                Messenger<string>.Broadcast(GameEvent.TASK_COMPLETED, task.Title);
 
                 Debug.Log($"[MissionManager] Task completed: {task.Title}");
-
                 deliveredAny = true;
             }
         }
@@ -157,5 +154,24 @@ public class MissionManager : MonoBehaviour, IGameManager
 
         requiredItems = task.Requirements;
         return requiredItems != null && requiredItems.Count > 0;
+    }
+
+    public void ResetMissions()
+    {
+        foreach (var task in Tasks)
+        {
+            task.Status = TaskStatus.NotStarted;
+
+            // Если есть прогресс внутри задачи, сбрось его, например:
+            task.ResetProgress();
+
+            // Если ResetProgress — не метод, а часть логики внутри TaskData,
+            // реализуй его внутри TaskData как метод и вызови здесь.
+        }
+
+        // После сброса можно пересчитать прогресс заново, если нужно
+        RecalculateAllProgress();
+
+        Debug.Log("[MissionManager] Missions reset to initial state");
     }
 }

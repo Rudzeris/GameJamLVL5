@@ -7,6 +7,6 @@ public class DialogHolder : MonoBehaviour, IInteractable
 
     public void Activate()
     {
-        Managers.Dialog.dialogBehaviour.StartDialog(dialogGraph);
+        Managers.Dialog.StartDialog(dialogGraph);
     }
 }

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 
 [Serializable]
@@ -61,6 +62,12 @@ public class Boiler : MonoBehaviour, IInteractable
         KotelUI.SetActive(!KotelUI.activeSelf);
     }
 
+    public void OnTriggerExit2D(Collider2D collision)
+    {
+        if (!collision.CompareTag("Player")) return;
+        KotelUI.SetActive(false);
+    }
+
     public void ClearIngredients()
     {
         currentIngredients.Clear();
@@ -69,19 +76,39 @@ public class Boiler : MonoBehaviour, IInteractable
 
     public void BrewPotion()
     {
-        foreach (var recipe in recipesDict)
+        foreach (var recipe in recipes)
         {
-            if (IsMatch(recipe.Value))
+            // Превращаем список в словарь для проверки
+            var dict = new Dictionary<ItemType, int>();
+            foreach (var ing in recipe.ingredients)
             {
-                Debug.Log($"Зелье сварено: {recipe.Key}");
+                dict[ing.itemType] = ing.amount;
+            }
+
+            if (IsMatch(dict))
+            {
+                Debug.Log($"Зелье сварено: {recipe.potionName}");
+
+                // Очищаем котёл
                 ClearIngredients();
+                KotelUI.GetComponent<BoilerUI>().ClearBoilerUI();
+
+                // Отправляем событие с оригинальным списком ингредиентов
+                Messenger<string, List<IngredientAmount>>.Broadcast(
+                    GameEvent.RECIPE_DISCOVERED,
+                    recipe.potionName,
+                    recipe.ingredients
+                );
+
                 return;
             }
         }
 
         Debug.Log("Зелье не распознано. Варка не удалась.");
         ClearIngredients();
+        Managers.Game.RestartCurrent();
     }
+
 
     private bool IsMatch(Dictionary<ItemType, int> recipe)
     {
@@ -104,5 +131,20 @@ public class Boiler : MonoBehaviour, IInteractable
     public Dictionary<ItemType, int> GetAllIngredients()
     {
         return new Dictionary<ItemType, int>(currentIngredients);
+    }
+
+    private void OnEnable()
+    {
+        SceneManager.sceneLoaded += OnSceneLoaded;
+    }
+
+    private void OnDisable()
+    {
+        SceneManager.sceneLoaded -= OnSceneLoaded;
+    }
+
+    private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        ClearIngredients();
     }
 }

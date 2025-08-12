@@ -21,6 +21,7 @@ public class InventoryUI : MonoBehaviour
 
     private void OnInventoryChanged(ItemType type, int amount)
     {
+        Debug.Log("Changed");
         if (amount > 0)
             AddOrUpdateSlot(type, amount);
         else
